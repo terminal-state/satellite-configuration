@@ -1,0 +1,49 @@
+---
+- name: Publish and Promote Content Views
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+  tags: publish_promote
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/content_views.yml
+    - satellite_config/lifecycle_environments.yml
+  vars:
+    content_views_to_promote:
+      - "CCV-RHEL8.10_All_Updates"
+      - "CCV-RHEL8.10_Security_Only"
+      - "CCV-RHEL9.6_All_Updates"
+      - "CCV-RHEL9.6_Security_Only"
+  tasks:
+    - name: Publish Content Views
+      redhat.satellite.content_view_version:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        content_view: "{{ item }}"
+        description: "Published by Ansible"
+      loop: "{{ content_views_to_promote }}"
+      register: publish_results
+      tags: publish
+
+    - name: Promote Content Views through lifecycle environments
+      redhat.satellite.content_view_version:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        content_view: "{{ item.0 }}"
+        current_lifecycle_environment: "{{ item.1.prior }}"
+        lifecycle_environments:
+          - "{{ item.1.name }}"
+        state: present
+      with_nested:
+        - "{{ content_views_to_promote }}"
+        - "{{ lifecycle_environments }}"
+      loop_control:
+        label: "{{ item.0 }} -> {{ item.1.name }}"
+      tags: promote

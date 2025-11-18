@@ -1,0 +1,25 @@
+---
+external_repositories:
+  - name: "AlmaLinux 9 BaseOS"
+    product: "Alma Linux"
+    label: "almalinux-9-baseos-x86_64"
+    content_type: "yum"
+    product: "Alma Linux"
+    arch: "x86_64"
+    download_policy: "on_demand"
+    mirroring_policy: "mirror_complete"
+    url: "https://repo.almalinux.org/almalinux/9/BaseOS/x86_64/os/"
+    gpg_key: "AlmaLinux RPM-GPG-KEY"
+    state: present
+
+  - name: "AlmaLinux 9 AppStream"
+    product: "Alma Linux"
+    label: "almalinux-9-appstream-x86_64"
+    content_type: "yum"
+    arch: "x86_64"
+    download_policy: "on_demand"
+    mirroring_policy: "mirror_complete"
+    url: "https://repo.almalinux.org/almalinux/9/AppStream/x86_64/os/"
+    gpg_key: "AlmaLinux RPM-GPG-KEY"
+    state: present
+

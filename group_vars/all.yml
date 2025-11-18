@@ -1,0 +1,81 @@
+# =========================================================
+# VM Configuration Variables
+# =========================================================
+vm_name: satellite-rhel9
+vm_memory_mb: 20480        # 20 GB
+vm_vcpus: 4
+vm_disk_gb: 500
+vm_network: mgmt
+
+# =========================================================
+# Networking Configuration
+# =========================================================
+vm_ip_address: 192.168.100.50
+vm_prefix_length: 24
+vm_gateway: 192.168.100.1
+vm_dns_servers: [192.168.100.1, 1.1.1.1]
+vm_nic_name: eth0
+domain: lab.local
+
+
+# =========================================================
+# Image and Key Configuration
+# =========================================================
+rhel_release: 9.7
+qcow_image_dir: /var/lib/libvirt/images
+qcow_image_base: "rhel-{{ rhel_release }}-x86_64-kvm.qcow2"
+qcow_image_path: "{{ qcow_image_dir }}/{{ qcow_image_base }}"
+vm_disk_path: "{{ qcow_image_dir }}/{{ vm_name }}.qcow2"
+seed_iso_path: "{{ qcow_image_dir }}/{{ vm_name }}-seed.iso"
+
+# SSH key to inject
+ssh_public_key_path: /home/ansible/.ssh/id_ed25519.pub
+
+# =========================================================
+# Default root credentials (for console login/debug)
+# =========================================================
+root_password: redhat
+ssh_password_auth: true
+
+# Red Hat registration
+rhsm_org: "Default_ORG"
+rhsm_activationkey: "YOUR_ACTIVATION_KEY"
+satellite_version: "6.18"
+satellite_name: satellite-rhel9
+
+# Optional proxy settings
+rhsm_http_proxy: ""
+rhsm_https_proxy: ""
+
+foreman_admin: "admin"
+foreman_admin_password: "Admin123"
+default_location: "Default Location"
+
+# --------------------------------------------------------------------
+# Satellite API and credentials
+# --------------------------------------------------------------------
+satellite_server_url: "https://192.168.100.50"
+satellite_username: "admin"
+satellite_password: "Admin123"
+satellite_validate_certs: false
+
+# Satellite repos (derived automatically)
+satellite_repos:
+  - "rhel-9-for-x86_64-baseos-rpms"
+  - "rhel-9-for-x86_64-appstream-rpms"
+  - "satellite-{{ satellite_version }}-for-rhel-9-x86_64-rpms"
+  - "satellite-maintenance-{{ satellite_version }}-for-rhel-9-x86_64-rpms"
+
+satellite_proxy_plugins:
+  - "foreman-plugin-ansible"
+  - "foreman-proxy-plugin-ansible"
+  - "foreman-proxy-plugin-discovery"
+
+daily_sync: "Daily SYNC"
+weekly_sync: "Weekly SYNC"
+
+# --------------------------------------------------------------------
+# Manifest details
+# --------------------------------------------------------------------
+satellite_manifest_path: "/root/manifest.zip"
+satellite_manifest_org: "{{ rhsm_org }}"

@@ -1,0 +1,7 @@
+sync_plans:
+  - name: "{{ daily_sync }}"
+    description: "Daily Sync"
+    organization: "{{ rhsm_org }}"
+    interval: "daily"
+    enabled: true
+    sync_date: "2025-01-01 03:00:00 UTC"

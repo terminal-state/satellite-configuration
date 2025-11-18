@@ -1,0 +1,27 @@
+---
+- name: Ensure External Products exist in Satellite
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+  tags: products
+
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/products.yml
+
+  tasks:
+    - name: Ensure defined products exist
+      redhat.satellite.product:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        state: "{{ item.state | default('present') }}"
+      loop: "{{ products }}"
+      loop_control:
+        label: "{{ item.name }}"
+

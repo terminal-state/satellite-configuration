@@ -1,0 +1,27 @@
+---
+- name: Configure Lifecycle Environments
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+  tags: lifecycle_environments
+
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/lifecycle_environments.yml
+
+  tasks:
+    - name: Ensure Lifecycle Environments exist in order
+      redhat.satellite.lifecycle_environment:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        prior: "{{ item.prior }}"
+        state: present
+      loop: "{{ lifecycle_environments }}"
+      loop_control:
+        label: "{{ item.name }}"

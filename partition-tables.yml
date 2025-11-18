@@ -1,0 +1,37 @@
+---
+- name: Configure Partition Tables
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+  tags: partition_tables
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/partition_tables.yml
+  tasks:
+    - name: Create or update Partition Tables
+      redhat.satellite.partition_table:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        name: "{{ item.name }}"
+        os_family: "{{ item.os_family }}"
+        locked: "{{ item.locked | default(false) }}"
+        layout: "{{ item.layout }}"
+        organizations:
+          - "{{ satellite_manifest_org }}"
+        locations: "{{ item.locations | default(omit) }}"
+        state: present
+      loop: "{{ partition_tables }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Display created partition tables
+      debug:
+        msg: |
+          Partition Table: {{ item.name }}
+          OS Family: {{ item.os_family }}
+      loop: "{{ partition_tables }}"
+      loop_control:
+        label: "{{ item.name }}"

@@ -1,0 +1,14 @@
+---
+products:
+  - name: "Alma Linux"
+    description: "AlmaLinux repositories and updates"
+    state: present
+
+  - name: "Elastic Search"
+    description: "Elastic repositories for Elasticsearch, Kibana, Beats"
+    state: present
+
+  - name: "Extra Packages for Enterprise Linux (EPEL)"
+    description: "EPEL content from Fedora project"
+    state: present
+

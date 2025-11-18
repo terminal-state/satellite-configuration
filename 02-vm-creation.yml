@@ -1,0 +1,10 @@
+---
+- name: Create RHEL VM
+  hosts: kvmhost
+  become: true
+  vars_files:
+    - group_vars/all.yml
+
+  roles:
+    - vm_build
+

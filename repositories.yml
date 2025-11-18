@@ -1,0 +1,26 @@
+---
+- name: Configure Red Hat Repositories in Satellite
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/repositories.yml
+
+  tasks:
+    - name: Enable required Red Hat repositories
+      redhat.satellite.repository_set:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        label: "{{ item.label }}"
+        state: enabled
+        all_repositories: "{{ true if (item.releasever is not defined or item.releasever == '') else omit }}"
+        repositories: "{{ omit if (item.releasever is not defined or item.releasever == '') else [{'releasever': item.releasever}] }}"
+      loop: "{{ redhat_repositories }}"
+      loop_control:
+        label: "{{ item.name }}"

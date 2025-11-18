@@ -1,0 +1,17 @@
+---
+lifecycle_environments:
+  - name: "Development"
+    description: "Development environment for testing and early builds"
+    prior: "Library"
+  - name: "QA"
+    description: "Quality assurance testing environment"
+    prior: "Development"
+  - name: "Pre-Production"
+    description: "Staging environment before production release"
+    prior: "QA"
+  - name: "Disaster Recovery"
+    description: "DR validation environment mirroring production"
+    prior: "Pre-Production"
+  - name: "Production"
+    description: "Live production environment"
+    prior: "Disaster Recovery"

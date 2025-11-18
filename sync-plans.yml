@@ -1,0 +1,33 @@
+---
+- name: Configure Red Hat Satellite
+  hosts: satellite
+  become: false
+  gather_facts: false
+  collections:
+    - redhat.satellite
+
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/sync_plans.yml
+
+  tasks:
+    - name: Ensure sync plans are present
+      redhat.satellite.sync_plan:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        name: "{{ item.name }}"
+        organization: "{{ item.organization | default(satellite_manifest_org) }}"
+        description: "{{ item.description | default('Automated sync plan') }}"
+        interval: "{{ item.interval }}"
+        enabled: "{{ item.enabled | default(true) }}"
+        sync_date: "{{ item.sync_date | default(omit) }}"
+        products:
+          - "Alma Linux"
+          - "Elastic Search"
+          - "Extra Packages for Enterprise Linux (EPEL)"
+          - "Red Hat Enterprise Linux for x86_64"
+      loop: "{{ sync_plans }}"
+      loop_control:
+        label: "{{ item.name }}"

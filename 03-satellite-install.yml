@@ -1,0 +1,51 @@
+---
+- name: Configure and install Red Hat Satellite
+  hosts: satellite
+  become: true
+  gather_facts: false
+
+  vars_files:
+    - group_vars/all.yml
+
+  tasks:
+    - name: Register system to Red Hat
+      community.general.redhat_subscription:
+        state: present
+        org_id: "{{ rhsm_org }}"
+        activationkey: "{{ rhsm_activationkey }}"
+        autosubscribe: false
+        http_proxy: "{{ rhsm_http_proxy | default(omit) }}"
+        https_proxy: "{{ rhsm_https_proxy | default(omit) }}"
+      tags: register
+
+    - name: Disable all default repos
+      command: subscription-manager repos --disable='*'
+      tags: repos
+
+    - name: Enable required Satellite repositories
+      command: subscription-manager repos --enable={{ item }}
+      loop: "{{ satellite_repos }}"
+      tags: repos
+
+    - name: Install Satellite packages
+      yum:
+        name: satellite
+        state: present
+
+    - name: Run satellite-installer with live progress
+      ansible.builtin.shell: |
+        set -o pipefail
+        script -q -c "satellite-installer  --scenario satellite  --foreman-initial-organization '{{ rhsm_org }}'  --foreman-initial-location '{{ default_location }}'  --foreman-initial-admin-username '{{ foreman_admin }}' --foreman-initial-admin-password '{{ foreman_admin_password }}'" 
+      args:
+        creates: /etc/foreman-installer/scenarios.d/satellite-answers.yaml
+      vars:
+        ansible_pty: yes
+
+    - name: Tail installer log (watch in another terminal)
+      debug:
+        msg: "Progress: tail -f /var/log/foreman-installer/satellite.log"
+
+    - name: Output Satellite console URL
+      debug:
+        msg: "Satellite installation complete. Access https://{{ satellite_name }}.{{ domain }}/"
+

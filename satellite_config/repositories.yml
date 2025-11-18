@@ -1,0 +1,72 @@
+---
+redhat_repositories:
+  - name: "RHEL 8 BaseOS x86_64"
+    product: "Red Hat Enterprise Linux for x86_64"
+    label: "rhel-8-for-x86_64-baseos-rpms"
+    releasever: "8.10"
+    sync_plan: "{{ daily_sync }}"
+    content_type: "yum"
+    enabled: true
+
+  - name: "RHEL 8 AppStream x86_64"
+    product: "Red Hat Enterprise Linux for x86_64"
+    label: "rhel-8-for-x86_64-appstream-rpms"
+    releasever: "8.10"
+    sync_plan: "{{ daily_sync }}"
+    content_type: "yum"
+    enabled: true
+
+  - name: "RHEL 9 BaseOS x86_64"
+    product: "Red Hat Enterprise Linux for x86_64"
+    label: "rhel-9-for-x86_64-baseos-rpms"
+    releasever: "9.6"
+    sync_plan: "{{ daily_sync }}"
+    content_type: "yum"
+    enabled: true
+
+  - name: "RHEL 9 AppStream x86_64"
+    product: "Red Hat Enterprise Linux for x86_64"
+    label: "rhel-9-for-x86_64-appstream-rpms"
+    releasever: "9.6"
+    sync_plan: "{{ daily_sync }}"
+    content_type: "yum"
+    enabled: true
+ 
+  - name: "Red Hat Satellite Client 6 for RHEL 8 x86_64"
+    product: "Red Hat Enterprise Linux for x86_64"
+    label: "satellite-client-6-for-rhel-8-x86_64-rpms"
+    sync_plan: "{{ daily_sync }}"
+    content_type: "yum"
+    releasever: ""
+    enabled: true
+    
+  - name: "Red Hat Satellite Client 6 for RHEL 9 x86_64"
+    product: "Red Hat Enterprise Linux for x86_64"
+    label: "satellite-client-6-for-rhel-9-x86_64-rpms"
+    sync_plan: "{{ daily_sync }}"
+    content_type: "yum"
+    enabled: true
+
+external_repositories:
+  - name: "AlmaLinux 9 BaseOS"
+    product: "Alma Limux"
+    label: "almalinux-9-baseos-x86_64"
+    content_type: "yum"
+    arch: "x86_64"
+    download_policy: "on_demand"
+    mirroring_policy: "mirror_complete"
+    url: "https://repo.almalinux.org/almalinux/9/BaseOS/x86_64/os/"
+    gpg_key: "https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux-9"
+    state: present
+
+  - name: "AlmaLinux 9 AppStream"
+    product: "Alma Linux"
+    label: "almalinux-9-appstream-x86_64"
+    content_type: "yum"
+    arch: "x86_64"
+    download_policy: "on_demand"
+    mirroring_policy: "mirror_complete"
+    url: "https://repo.almalinux.org/almalinux/9/AppStream/x86_64/os/"
+    gpg_key: "https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux-9"
+    state: present
+

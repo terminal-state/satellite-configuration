@@ -1,0 +1,34 @@
+---
+- name: Configure External Repositories in Satellite
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+  tags: repositories
+
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/external_repositories.yml
+
+  tasks:
+    - name: Create or update external repositories
+      redhat.satellite.repository:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        product: "{{ item.product }}"
+        name: "{{ item.name }}"
+        label: "{{ item.label }}"
+        content_type: "{{ item.content_type }}"
+        arch: "{{ item.arch }}"
+        url: "{{ item.url }}"
+        gpg_key: "{{ item.gpg_key }}"
+        download_policy: "{{ item.download_policy }}"
+        mirroring_policy: "{{ item.mirroring_policy }}"
+        state: "{{ item.state }}"
+      loop: "{{ external_repositories }}"
+      loop_control:
+        label: "{{ item.name }}"
+      tags: repositories

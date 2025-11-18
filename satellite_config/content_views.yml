@@ -1,0 +1,163 @@
+---
+content_views:
+  - name: "CV-RHEL8.10_Base"
+    description: "Red Hat Enterprise Linux 8.10 Base Content View"
+    repositories:
+      - name: "Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8.10"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8.10"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs"
+        product: "Red Hat Enterprise Linux for x86_64"
+    auto_publish: false
+    filters:
+      - name: "Exclude All Errata"
+        filter_type: "erratum"
+        inclusion: false
+
+  - name: "CV-RHEL9.6_Base"
+    description: "Red Hat Enterprise Linux 9.6 Base Content View"
+    repositories:
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS RPMs 9.6"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - AppStream RPMs 9.6"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Satellite Client 6 for RHEL 9 x86_64 RPMs"
+        product: "Red Hat Enterprise Linux for x86_64"
+    auto_publish: false
+    filters:
+      - name: "Exclude All Errata"
+        filter_type: "erratum"
+        inclusion: false
+
+  - name: "CV-RHEL8.10_Security_Only"
+    description: "RHEL 8.10 with only security updates"
+    repositories:
+      - name: "Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8.10"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8.10"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs"
+        product: "Red Hat Enterprise Linux for x86_64"
+    filter_rules:
+      - name: "Security Updates Only"
+        type: "rpm"
+        inclusion: true
+        original_packages: true
+        description: "Include only security updates"
+        rules:
+          - name: "Security Errata"
+            type: "errata_type"
+            types: ["security"]
+    auto_publish: false
+
+  - name: "CV-RHEL9.6_Security_Only"
+    description: "RHEL 9.6 with only security updates"
+    repositories:
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS RPMs 9.6"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - AppStream RPMs 9.6"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Satellite Client 6 for RHEL 9 x86_64 RPMs"
+        product: "Red Hat Enterprise Linux for x86_64"
+    filter_rules:
+      - name: "Security Updates Only"
+        type: "rpm"
+        inclusion: true
+        original_packages: true
+        description: "Include only security updates"
+        rules:
+          - name: "Security Errata"
+            type: "errata_type"
+            types: ["security"]
+    auto_publish: false
+
+  - name: "CV-RHEL9.6_Updates"
+    description: "RHEL 9.6 with only security updates"
+    repositories:
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - BaseOS RPMs 9.6"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Enterprise Linux 9 for x86_64 - AppStream RPMs 9.6"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Satellite Client 6 for RHEL 9 x86_64 RPMs"
+        product: "Red Hat Enterprise Linux for x86_64"
+    filter_rules:
+      - name: "Updates Only"
+        type: "rpm"
+        inclusion: true
+        original_packages: true
+        description: "Include only updates"
+        rules:
+          - name: "Enhancements & Bugfixes"
+            type: "errata_type"
+            types: 
+              - enhancement
+              - bugfix
+    auto_publish: false
+
+  - name: "CV-RHEL8.10_Updates"
+    description: "RHEL 8.10 with only security updates"
+    repositories:
+      - name: "Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8.10"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8.10"
+        product: "Red Hat Enterprise Linux for x86_64"
+      - name: "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs"
+        product: "Red Hat Enterprise Linux for x86_64"
+    filter_rules:
+      - name: "Updates Only"
+        type: "rpm"
+        inclusion: true
+        original_packages: true
+        description: "Include only updates"
+        rules:
+          - name: "Enhancements & Bugfixes"
+            type: "errata_type"
+            types: 
+              - enhancement
+              - bugfix
+    auto_publish: false
+
+  - name: "CCV-RHEL8.10_Security_Only"
+    description: "Composite view containing RHEL 8.10 base + Security views"
+    composite: true
+    components:
+      - content_view: "CV-RHEL8.10_Base"
+        latest: true
+      - content_view: "CV-RHEL8.10_Security_Only"
+        latest: true
+    auto_publish: false
+
+  - name: "CCV-RHEL9.6_Security_Only"
+    description: "Composite view containing RHEL 9.6 and Security base views"
+    composite: true
+    components:
+      - content_view: "CV-RHEL9.6_Base"
+        latest: true
+      - content_view: "CV-RHEL9.6_Security_Only"
+        latest: true
+    auto_publish: false
+
+  - name: "CCV-RHEL8.10_All_Updates"
+    description: "Composite view containing RHEL 8.10 base + Security views"
+    composite: true
+    components:
+      - content_view: "CV-RHEL8.10_Base"
+        latest: true
+      - content_view: "CV-RHEL8.10_Updates"
+        latest: true
+      - content_view: "CV-RHEL8.10_Security_Only"
+        latest: true
+    auto_publish: false
+
+  - name: "CCV-RHEL9.6_All_Updates"
+    description: "Composite view containing RHEL 9.6 and Security base views"
+    composite: true
+    components:
+      - content_view: "CV-RHEL9.6_Base"
+        latest: true
+      - content_view: "CV-RHEL9.6_Updates"
+        latest: true
+      - content_view: "CV-RHEL9.6_Security_Only"
+        latest: true
+    auto_publish: false

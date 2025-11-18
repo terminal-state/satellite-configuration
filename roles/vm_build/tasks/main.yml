@@ -1,0 +1,152 @@
+---
+# =========================================================
+# 1. Validate and prepare environment
+# =========================================================
+- name: Check for base QCOW image
+  stat:
+    path: "{{ qcow_image_path }}"
+  register: qcow_check
+
+- name: Fail if base image is missing
+  fail:
+    msg: "QCOW base image {{ qcow_image_path }} not found."
+  when: not qcow_check.stat.exists
+
+- name: Ensure VM disk does not already exist
+  stat:
+    path: "{{ vm_disk_path }}"
+  register: vm_disk_check
+
+- name: Create VM disk (backed by base image)
+  command: >
+    qemu-img create -f qcow2 -F qcow2
+    -b {{ qcow_image_path }}
+    {{ vm_disk_path }}
+    {{ vm_disk_gb }}G
+  when: not vm_disk_check.stat.exists
+
+# =========================================================
+# 2. Create cloud-init seed ISO dynamically
+# =========================================================
+- name: Create temporary directory for cloud-init files
+  tempfile:
+    state: directory
+    suffix: cloudinit
+  register: tmpdir
+
+- name: Generate user-data for cloud-init
+  copy:
+    dest: "{{ tmpdir.path }}/user-data"
+    content: |
+      #cloud-config
+      users:
+        - name: root
+          ssh_authorized_keys:
+            - "{{ lookup('file', ssh_public_key_path) }}"
+          lock_passwd: false
+          plain_text_passwd: "{{ root_password }}"
+          sudo: ['ALL=(ALL) NOPASSWD:ALL']
+          shell: /bin/bash
+      chpasswd:
+        expire: False
+      ssh_pwauth: {{ ssh_password_auth | bool }}
+      disable_root: false
+
+      # Configure static networking with NetworkManager
+      network:
+        version: 2
+        renderer: NetworkManager
+        ethernets:
+          eth0:
+            dhcp4: false
+            dhcp6: false
+            addresses:
+              - "{{ vm_ip_address }}/{{ vm_prefix_length }}"
+            gateway4: "{{ vm_gateway }}"
+            nameservers:
+              addresses: {{ vm_dns_servers }}
+
+- name: Generate meta-data for cloud-init
+  copy:
+    dest: "{{ tmpdir.path }}/meta-data"
+    content: |
+      instance-id: {{ vm_name }}
+      local-hostname: {{ vm_name }}
+
+- name: Create cloud-init seed ISO
+  command: >
+    genisoimage -output {{ seed_iso_path }}
+    -volid cidata -joliet -rock
+    {{ tmpdir.path }}/user-data {{ tmpdir.path }}/meta-data
+  args:
+    creates: "{{ seed_iso_path }}"
+
+- name: Clean up temporary cloud-init directory
+  file:
+    path: "{{ tmpdir.path }}"
+    state: absent
+
+# =========================================================
+# 3. Build domain XML and define VM
+# =========================================================
+- name: Create VM XML definition
+  copy:
+    dest: "/tmp/{{ vm_name }}.xml"
+    content: |
+      <domain type='kvm'>
+        <name>{{ vm_name }}</name>
+        <memory unit='MiB'>{{ vm_memory_mb }}</memory>
+        <vcpu placement='static'>{{ vm_vcpus }}</vcpu>
+        <os>
+          <type arch='x86_64' machine='pc-q35-rhel9.2.0'>hvm</type>
+        </os>
+        <features>
+          <acpi/>
+          <apic/>
+          <pae/>
+        </features>
+        <cpu mode='host-passthrough'/>
+        <clock offset='utc'/>
+        <on_poweroff>destroy</on_poweroff>
+        <on_reboot>restart</on_reboot>
+        <on_crash>destroy</on_crash>
+        <devices>
+          <disk type='file' device='disk'>
+            <driver name='qemu' type='qcow2'/>
+            <source file='{{ vm_disk_path }}'/>
+            <target dev='vda' bus='virtio'/>
+          </disk>
+          <disk type='file' device='cdrom'>
+            <driver name='qemu' type='raw'/>
+            <source file='{{ seed_iso_path }}'/>
+            <target dev='sda' bus='sata'/>
+            <readonly/>
+          </disk>
+          <interface type='network'>
+            <source network='{{ vm_network }}'/>
+            <model type='virtio'/>
+          </interface>
+          <console type='pty'/>
+          <graphics type='vnc' port='-1'/>
+        </devices>
+      </domain>
+
+
+# =========================================================
+# 4. Register and start the virtual machine (compatible with old libvirt module)
+# =========================================================
+- name: Define domain from XML (compatible mode)
+  community.libvirt.virt:
+    command: define
+    xml: "{{ lookup('file', '/tmp/' + vm_name + '.xml') }}"
+  register: vm_define
+
+- name: Enable autostart for the VM
+  command: "virsh autostart {{ vm_name }}"
+  changed_when: false
+
+- name: Start VM
+  community.libvirt.virt:
+    name: "{{ vm_name }}"
+    state: running
+

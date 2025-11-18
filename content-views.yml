@@ -1,0 +1,120 @@
+---
+- name: Configure Content Views
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+  tags: content_views
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/content_views.yml
+  tasks:
+    - name: Create or update Content Views
+      redhat.satellite.content_view:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        name: "{{ item.name }}"
+        description: "{{ item.description | default(omit) }}"
+        repositories: "{{ item.repositories | default(omit) }}"
+        composite: "{{ item.composite | default(false) }}"
+        components: "{{ item.components | default(omit) }}"
+        auto_publish: "{{ item.auto_publish | default(false) }}"
+        state: present
+      loop: "{{ content_views }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: not item.composite | default(false)
+
+    - name: Create or update Composite Content Views
+      redhat.satellite.content_view:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        name: "{{ item.name }}"
+        description: "{{ item.description | default(omit) }}"
+        composite: true
+        components: "{{ item.components }}"
+        auto_publish: "{{ item.auto_publish | default(false) }}"
+        state: present
+      loop: "{{ content_views }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: item.composite | default(false)
+
+    - name: Create Content View Filters from filters list
+      redhat.satellite.content_view_filter:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        content_view: "{{ item.0.name }}"
+        name: "{{ item.1.name }}"
+        filter_type: "{{ item.1.filter_type }}"
+        inclusion: "{{ item.1.inclusion | default(true) }}"
+        original_packages: "{{ item.1.original_packages | default(true) if item.1.filter_type == 'rpm' else omit }}"
+        description: "{{ item.1.description | default(omit) }}"
+        state: present
+      loop: "{{ content_views | subelements('filters', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} - {{ item.1.name }}"
+
+    - name: Create Content View Filters from filter_rules list
+      redhat.satellite.content_view_filter:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        content_view: "{{ item.0.name }}"
+        name: "{{ item.1.name }}"
+        filter_type: "erratum"
+        inclusion: "{{ item.1.inclusion | default(true) }}"
+        description: "{{ item.1.description | default(omit) }}"
+        state: present
+      loop: "{{ content_views | subelements('filter_rules', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} - {{ item.1.name }}"
+
+    - name: Build filter rules list
+      set_fact:
+        filter_rules_list: >-
+          {%- set rules = [] -%}
+          {%- for cv in content_views -%}
+            {%- if cv.filter_rules is defined -%}
+              {%- for filter in cv.filter_rules -%}
+                {%- if filter.rules is defined -%}
+                  {%- for rule in filter.rules -%}
+                    {%- if rule.type == 'errata_type' -%}
+                      {{- rules.append({
+                        'content_view': cv.name,
+                        'filter_name': filter.name,
+                        'rule': rule
+                      }) -}}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{- rules -}}
+
+    - name: Create Content View Filter Rules for erratum filters
+      redhat.satellite.content_view_filter_rule:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        content_view: "{{ item.content_view }}"
+        content_view_filter: "{{ item.filter_name }}"
+        types: "{{ item.rule.types }}"
+        state: present
+      loop: "{{ filter_rules_list }}"
+      loop_control:
+        label: "{{ item.content_view }} - {{ item.filter_name }} - {{ item.rule.name | default('rule') }}"

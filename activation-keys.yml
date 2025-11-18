@@ -1,0 +1,72 @@
+---
+- name: Configure Activation Keys
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+  tags: activation_keys
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/activation_keys.yml
+  tasks:
+    - name: Create or update Activation Keys
+      redhat.satellite.activation_key:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        name: "{{ item.name }}"
+        description: "{{ item.description | default(omit) }}"
+        lifecycle_environment: "{{ item.lifecycle_environment }}"
+        content_view: "{{ item.content_view }}"
+        release_version: "{{ item.release_version | default(omit) }}"
+        service_level: "{{ item.service_level | default(omit) }}"
+        auto_attach: "{{ item.auto_attach | default(true) }}"
+        max_hosts: "{{ item.max_hosts | default(omit) }}"
+        purpose_usage: "{{ item.purpose_usage | default(omit) }}"
+        purpose_role: "{{ item.purpose_role | default(omit) }}"
+        state: present
+      loop: "{{ activation_keys }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Attach subscriptions to Activation Keys
+      redhat.satellite.activation_key:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        name: "{{ item.0.activation_key }}"
+        subscriptions: "{{ item.0.subscriptions }}"
+        state: present
+      loop: "{{ activation_key_subscriptions | default([]) }}"
+      loop_control:
+        label: "{{ item.0.activation_key }}"
+      when: activation_key_subscriptions is defined
+
+    - name: Associate Host Collections with Activation Keys
+      redhat.satellite.activation_key:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        name: "{{ item.activation_key }}"
+        host_collections: "{{ item.host_collections }}"
+        state: present
+      loop: "{{ activation_key_host_collections | default([]) }}"
+      loop_control:
+        label: "{{ item.activation_key }}"
+      when: activation_key_host_collections is defined
+
+    - name: Display Activation Key registration commands
+      debug:
+        msg: |
+          Activation key: {{ item.name }}
+          Registration command:
+          subscription-manager register --org="{{ satellite_manifest_org }}" --activationkey="{{ item.name }}"
+      loop: "{{ activation_keys }}"
+      loop_control:
+        label: "{{ item.name }}"

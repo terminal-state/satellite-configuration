@@ -1,0 +1,32 @@
+---
+- name: Prepare KVM Host for VM Deployment
+  hosts: kvmhost
+  become: true
+  tasks:
+    - name: Ensure required packages are installed
+      package:
+        name:
+          - qemu-kvm
+          - libvirt
+          - virt-install
+          - libvirt-daemon
+          - python3-libvirt
+          - python3-lxml
+        state: present
+
+    - name: Ensure libvirtd service is enabled and running
+      service:
+        name: libvirtd
+        state: started
+        enabled: true
+
+    - name: Check for base QCOW image
+      stat:
+        path: "{{ qcow_image_path }}"
+      register: qcow_check
+
+    - name: Fail if base image is missing
+      fail:
+        msg: "QCOW base image {{ qcow_image_path }} not found."
+      when: not qcow_check.stat.exists
+

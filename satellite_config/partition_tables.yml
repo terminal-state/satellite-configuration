@@ -1,0 +1,150 @@
+---
+partition_tables:
+  - name: "RHEL8_Standard"
+    os_family: "Redhat"
+    locked: false
+    layout: |
+      <%#
+      kind: ptable
+      name: RHEL8_Standard
+      model: ProvisioningTemplate
+      oses:
+      - AlmaLinux
+      - CentOS
+      - CentOS_Stream
+      - Fedora
+      - RedHat
+      - Rocky
+      %>
+      zerombr
+      clearpart --all --initlabel
+      
+      # Create primary partitions
+      part /boot --fstype=xfs --size=1024
+      part /boot/efi --fstype=efi --size=600 --fsoptions="umask=0077,shortname=winnt"
+      
+      # Create LVM physical volume
+      part pv.01 --grow --size=1
+      
+      # Create volume group
+      volgroup rhel --pesize=4096 pv.01
+      
+      # Create logical volumes
+      logvol / --fstype=xfs --name=root --vgname=rhel --size=10240
+      logvol /var --fstype=xfs --name=var --vgname=rhel --size=10240
+      logvol /var/log --fstype=xfs --name=varlog --vgname=rhel --size=5120
+      logvol /var/log/audit --fstype=xfs --name=varlogaudit --vgname=rhel --size=2048
+      logvol /tmp --fstype=xfs --name=tmp --vgname=rhel --size=5120 --fsoptions="nodev,nosuid,noexec"
+      logvol /home --fstype=xfs --name=home --vgname=rhel --size=5120 --fsoptions="nodev"
+      logvol swap --name=swap --vgname=rhel --size=4096
+
+  - name: "RHEL9_Standard"
+    os_family: "Redhat"
+    locked: false
+    layout: |
+      <%#
+      kind: ptable
+      name: RHEL9_Standard
+      model: ProvisioningTemplate
+      oses:
+      - AlmaLinux
+      - CentOS_Stream
+      - RedHat
+      - Rocky
+      %>
+      zerombr
+      clearpart --all --initlabel
+      
+      # Create primary partitions
+      part /boot --fstype=xfs --size=1024
+      part /boot/efi --fstype=efi --size=600 --fsoptions="umask=0077,shortname=winnt"
+      
+      # Create LVM physical volume
+      part pv.01 --grow --size=1
+      
+      # Create volume group
+      volgroup rhel --pesize=4096 pv.01
+      
+      # Create logical volumes
+      logvol / --fstype=xfs --name=root --vgname=rhel --size=10240
+      logvol /var --fstype=xfs --name=var --vgname=rhel --size=10240
+      logvol /var/log --fstype=xfs --name=varlog --vgname=rhel --size=5120
+      logvol /var/log/audit --fstype=xfs --name=varlogaudit --vgname=rhel --size=2048
+      logvol /tmp --fstype=xfs --name=tmp --vgname=rhel --size=5120 --fsoptions="nodev,nosuid,noexec"
+      logvol /home --fstype=xfs --name=home --vgname=rhel --size=5120 --fsoptions="nodev"
+      logvol swap --name=swap --vgname=rhel --size=4096
+
+  - name: "RHEL_Database_Server"
+    os_family: "Redhat"
+    locked: false
+    layout: |
+      <%#
+      kind: ptable
+      name: RHEL_Database_Server
+      model: ProvisioningTemplate
+      oses:
+      - RedHat
+      - CentOS
+      - AlmaLinux
+      - Rocky
+      %>
+      zerombr
+      clearpart --all --initlabel
+      
+      part /boot --fstype=xfs --size=1024
+      part /boot/efi --fstype=efi --size=600 --fsoptions="umask=0077,shortname=winnt"
+      part pv.01 --grow --size=1
+      
+      volgroup rhel --pesize=4096 pv.01
+      
+      logvol / --fstype=xfs --name=root --vgname=rhel --size=10240
+      logvol /var --fstype=xfs --name=var --vgname=rhel --size=20480
+      logvol /var/log --fstype=xfs --name=varlog --vgname=rhel --size=10240
+      logvol /var/log/audit --fstype=xfs --name=varlogaudit --vgname=rhel --size=2048
+      logvol /tmp --fstype=xfs --name=tmp --vgname=rhel --size=10240 --fsoptions="nodev,nosuid,noexec"
+      logvol /home --fstype=xfs --name=home --vgname=rhel --size=5120 --fsoptions="nodev"
+      logvol swap --name=swap --vgname=rhel --size=8192
+      # Database data partition - adjust size as needed
+      logvol /var/lib/pgsql --fstype=xfs --name=pgsql --vgname=rhel --size=51200
+
+  - name: "RHEL_Minimal"
+    os_family: "Redhat"
+    locked: false
+    layout: |
+      <%#
+      kind: ptable
+      name: RHEL_Minimal
+      model: ProvisioningTemplate
+      oses:
+      - RedHat
+      - CentOS
+      - AlmaLinux
+      - Rocky
+      %>
+      zerombr
+      clearpart --all --initlabel
+      
+      part /boot --fstype=xfs --size=1024
+      part /boot/efi --fstype=efi --size=600 --fsoptions="umask=0077,shortname=winnt"
+      part pv.01 --grow --size=1
+      
+      volgroup rhel --pesize=4096 pv.01
+      
+      logvol / --fstype=xfs --name=root --vgname=rhel --grow --size=8192
+      logvol swap --name=swap --vgname=rhel --size=2048
+
+  - name: "RHEL_AutoPart"
+    os_family: "Redhat"
+    locked: false
+    layout: |
+      <%#
+      kind: ptable
+      name: RHEL_AutoPart
+      model: ProvisioningTemplate
+      oses:
+      - RedHat
+      - CentOS
+      - AlmaLinux
+      - Rocky
+      %>
+      autopart --type=lvm --fstype=xfs

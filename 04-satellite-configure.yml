@@ -1,0 +1,57 @@
+---
+- import_playbook: content-credentials.yml
+  tags:
+    - credentials
+    - all
+
+- import_playbook: products.yml
+  tags:
+    - repositories
+    - all
+
+- import_playbook: repositories.yml
+  tags:
+    - repositories
+    - all
+
+- import_playbook: external-repositories.yml
+  tags:
+    - repositories
+    - all
+
+- import_playbook: sync-plans.yml
+  tags:
+    - syncplans
+    - all
+  ignore_errors: true
+
+- import_playbook: lifecycle-environments.yml
+  tags:
+    - lifecycle_environments
+    - all
+  ignore_errors: true
+
+- import_playbook: content-views.yml
+  tags:
+    - content_views
+    - all
+  ignore_errors: true
+
+- import_playbook: publish-promote-content-views.yml
+  tags:
+    - promote
+    - publish
+    - all
+  ignore_errors: true
+
+- import_playbook: activation-keys.yml
+  tags:
+    - activation_keys
+    - all
+  ignore_errors: true
+
+- import_playbook: partition-tables.yml
+  tags:
+    - partition_tables
+    - all
+  ignore_errors: true
