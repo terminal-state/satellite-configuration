@@ -240,7 +240,7 @@ activation_keys:
     release_version: "8.10"
 ```
 
-## Customization
+## Customisation
 
 ### Adding External Repositories
 
