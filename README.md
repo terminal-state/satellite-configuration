@@ -11,7 +11,7 @@ This repository contains Ansible playbooks and configuration files for automatin
 - [Quick Start](#quick-start)
 - [Detailed Usage Guide](#detailed-usage-guide)
 - [Configuration Files](#configuration-files)
-- [Customization](#customization)
+- [Customisation](#customization)
 - [Troubleshooting](#troubleshooting)
 
 ## Overview
