@@ -55,3 +55,15 @@
     - partition_tables
     - all
   ignore_errors: true
+
+- import_playbook: operatingsystems.yml
+  tags:
+    - operatingsystems
+    - all
+  ignore_errors: true
+
+- import_playbook: hostgroups.yml
+  tags:
+    - hostgroups
+    - all
+  ignore_errors: true

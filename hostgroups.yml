@@ -1,0 +1,52 @@
+---
+- name: Configure Host Groups
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+  tags: hostgroups
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/hostgroups.yml
+
+  tasks:
+    - name: Create or update host groups
+      redhat.satellite.hostgroup:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        name: "{{ item.name }}"
+        description: "{{ item.description | default(omit) }}"
+        parent: "{{ item.parent | default(omit) }}"
+        architecture: "{{ item.architecture | default(omit) }}"
+        operatingsystem: "{{ item.operatingsystem | default(omit) }}"
+        medium: "{{ item.medium | default(omit) }}"
+        ptable: "{{ item.ptable | default(omit) }}"
+        pxe_loader: "{{ item.pxe_loader | default(omit) }}"
+        root_pass: "{{ item.root_pass | default(omit) }}"
+        lifecycle_environment: "{{ item.lifecycle_environment | default(omit) }}"
+        content_view: "{{ item.content_view | default(omit) }}"
+        content_source: "{{ item.content_source | default(omit) }}"
+        activation_keys: "{{ item.activation_keys | default(omit) }}"
+        parameters: "{{ item.parameters | default(omit) }}"
+        domain: "{{ item.domain | default(omit) }}"
+        subnet: "{{ item.subnet | default(omit) }}"
+        locations: "{{ item.locations | default(omit) }}"
+        state: present
+      loop: "{{ satellite_hostgroups }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Display host group hierarchy
+      debug:
+        msg: |
+          Host Group: {{ item.name }}
+          Parent: {{ item.parent | default('None') }}
+          OS: {{ item.operatingsystem | default('Inherited') }}
+          Lifecycle: {{ item.lifecycle_environment | default('Inherited') }}
+          Content View: {{ item.content_view | default('Inherited') }}
+      loop: "{{ satellite_hostgroups }}"
+      loop_control:
+        label: "{{ item.name }}"

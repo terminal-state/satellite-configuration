@@ -1,0 +1,111 @@
+---
+- name: Configure Operating Systems
+  hosts: satellite
+  gather_facts: false
+  collections:
+    - redhat.satellite
+  tags: operatingsystems
+  vars_files:
+    - group_vars/all.yml
+    - satellite_config/operatingsystems.yml
+  
+  tasks:
+    - name: Create or update operating systems
+      redhat.satellite.operatingsystem:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        name: "{{ item.name }}"
+        major: "{{ item.major }}"
+        minor: "{{ item.minor | default(omit) }}"
+        description: "{{ item.description | default(omit) }}"
+        family: "{{ item.family }}"
+        release_name: "{{ item.release_name | default(omit) }}"
+        state: present
+      loop: "{{ operatingsystems }}"
+      loop_control:
+        label: "{{ item.name }} {{ item.major }}.{{ item.minor | default('') }}"
+
+    - name: Associate architectures with operating systems
+      redhat.satellite.operatingsystem:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        name: "{{ item.name }}"
+        major: "{{ item.major }}"
+        minor: "{{ item.minor | default(omit) }}"
+        os_family: "{{ item.family }}"
+        architectures: "{{ item.architectures }}"
+        state: present
+      loop: "{{ operatingsystems }}"
+      when: item.architectures is defined
+      loop_control:
+        label: "{{ item.name }} {{ item.major }}.{{ item.minor | default('') }}"
+
+    - name: Associate partition tables with operating systems
+      redhat.satellite.operatingsystem:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        name: "{{ item.name }}"
+        major: "{{ item.major }}"
+        minor: "{{ item.minor | default(omit) }}"
+        os_family: "{{ item.family }}"
+        ptables: "{{ item.ptables }}"
+        state: present
+      loop: "{{ operatingsystems }}"
+      when: item.ptables is defined
+      loop_control:
+        label: "{{ item.name }} {{ item.major }}.{{ item.minor | default('') }}"
+
+    - name: Create installation media
+      redhat.satellite.installation_medium:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        name: "{{ item.name }}"
+        path: "{{ item.path }}"
+        os_family: "{{ item.os_family | default(omit) }}"
+        operatingsystems: "{{ item.operatingsystems | default(omit) }}"
+        locations: "{{ item.locations | default(omit) }}"
+        organizations: "{{ item.organizations | default(omit) }}"
+        state: present
+      loop: "{{ installation_media | default([]) }}"
+      when: installation_media is defined
+      loop_control:
+        label: "{{ item.name }}"
+
+    # NOTE: Provisioning template association is better handled at the hostgroup level
+    # This provides more flexibility and control over which templates are used for different use cases
+    # See hostgroups.yml for template associations
+    #
+    # - name: Associate provisioning templates with operating systems
+    #   redhat.satellite.os_default_template:
+    #     server_url: "{{ satellite_server_url }}"
+    #     username: "{{ satellite_username }}"
+    #     password: "{{ satellite_password }}"
+    #     validate_certs: "{{ satellite_validate_certs }}"
+    #     operatingsystem: "{{ item.0.name }} {{ item.0.major }}.{{ item.0.minor | default('') }}"
+    #     provisioning_template: "{{ item.1.name }}"
+    #     template_kind: "{{ item.1.template_kind }}"
+    #     state: present
+    #   with_subelements:
+    #     - "{{ operatingsystems }}"
+    #     - provisioning_templates
+    #     - skip_missing: true
+    #   loop_control:
+    #     label: "{{ item.0.name }} {{ item.0.major }}.{{ item.0.minor | default('') }} - {{ item.1.name }}"
+
+    - name: Display created operating systems
+      debug:
+        msg: |
+          Operating System: {{ item.name }} {{ item.major }}.{{ item.minor | default('') }}
+          Description: {{ item.description | default('N/A') }}
+          Family: {{ item.family }}
+      loop: "{{ operatingsystems }}"
+      loop_control:
+        label: "{{ item.name }} {{ item.major }}.{{ item.minor | default('') }}"

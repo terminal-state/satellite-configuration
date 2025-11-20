@@ -1,0 +1,195 @@
+---
+# Hostgroups are organized in a hierarchical structure:
+# - Base hostgroups define OS, architecture, and partition tables
+# - Environment-specific child hostgroups inherit from base and add lifecycle/content view specifics
+# - Role-specific hostgroups can further specialize configurations
+
+satellite_hostgroups:
+  # ============================================================================
+  # RHEL 9 Base Hostgroups
+  # ============================================================================
+
+  - name: "RHEL9-Base"
+    description: "Base configuration for all RHEL 9 systems"
+    architecture: "x86_64"
+    operatingsystem: "Red Hat Enterprise Linux 9.6"
+    medium: "RHEL 9.6 Kickstart Media"
+    ptable: "RHEL9_Standard"
+    pxe_loader: "PXELinux BIOS"
+    root_pass: "{{ default_root_password | default(omit) }}"
+    locations:
+      - "{{ default_location }}"
+    parameters:
+      - name: "enable-remote-execution"
+        value: "true"
+        parameter_type: "boolean"
+      - name: "package_upgrade"
+        value: "true"
+        parameter_type: "boolean"
+
+  # RHEL 9.6 Development Environment
+  - name: "RHEL9-Base/Development"
+    description: "RHEL 9.6 systems for Development environment"
+    parent: "RHEL9-Base"
+    lifecycle_environment: "Development"
+    content_view: "CCV-RHEL9.6_All_Updates"
+    content_source: "{{ satellite_name }}"
+    activation_keys: "rhel9.6-dev"
+    parameters:
+      - name: "environment"
+        value: "development"
+        parameter_type: "string"
+
+  # RHEL 9.6 QA Environment
+  - name: "RHEL9-Base/QA"
+    description: "RHEL 9.6 systems for QA environment"
+    parent: "RHEL9-Base"
+    lifecycle_environment: "QA"
+    content_view: "CCV-RHEL9.6_All_Updates"
+    content_source: "{{ satellite_name }}"
+    activation_keys: "rhel9.6-qa"
+    parameters:
+      - name: "environment"
+        value: "qa"
+        parameter_type: "string"
+
+  # RHEL 9.6 Production Environment
+  - name: "RHEL9-Base/Production"
+    description: "RHEL 9.6 systems for Production environment"
+    parent: "RHEL9-Base"
+    lifecycle_environment: "Production"
+    content_view: "CCV-RHEL9.6_Security_Only"
+    content_source: "{{ satellite_name }}"
+    activation_keys: "rhel9.6-prod"
+    parameters:
+      - name: "environment"
+        value: "production"
+        parameter_type: "string"
+      - name: "package_upgrade"
+        value: "false"
+        parameter_type: "boolean"
+
+  # ============================================================================
+  # RHEL 9.5 Hostgroups
+  # ============================================================================
+
+  - name: "RHEL9.5-Base"
+    description: "Base configuration for RHEL 9.5 systems"
+    architecture: "x86_64"
+    operatingsystem: "Red Hat Enterprise Linux 9.5"
+    medium: "RHEL 9.5 Kickstart Media"
+    ptable: "RHEL9_Standard"
+    pxe_loader: "PXELinux BIOS"
+    root_pass: "{{ default_root_password | default(omit) }}"
+    locations:
+      - "{{ default_location }}"
+    parameters:
+      - name: "enable-remote-execution"
+        value: "true"
+        parameter_type: "boolean"
+
+  - name: "RHEL9.5-Base/Production"
+    description: "RHEL 9.5 systems for Production (legacy)"
+    parent: "RHEL9.5-Base"
+    lifecycle_environment: "Production"
+    content_view: "CCV-RHEL9.6_Security_Only"
+    content_source: "{{ satellite_name }}"
+    parameters:
+      - name: "environment"
+        value: "production"
+        parameter_type: "string"
+
+  # ============================================================================
+  # RHEL 8 Base Hostgroups
+  # ============================================================================
+
+  - name: "RHEL8-Base"
+    description: "Base configuration for all RHEL 8 systems"
+    architecture: "x86_64"
+    operatingsystem: "Red Hat Enterprise Linux 8.10"
+    medium: "RHEL 8.10 Kickstart Media"
+    ptable: "RHEL8_Standard"
+    pxe_loader: "PXELinux BIOS"
+    root_pass: "{{ default_root_password | default(omit) }}"
+    locations:
+      - "{{ default_location }}"
+    parameters:
+      - name: "enable-remote-execution"
+        value: "true"
+        parameter_type: "boolean"
+      - name: "package_upgrade"
+        value: "true"
+        parameter_type: "boolean"
+
+  # RHEL 8.10 Development Environment
+  - name: "RHEL8-Base/Development"
+    description: "RHEL 8.10 systems for Development environment"
+    parent: "RHEL8-Base"
+    lifecycle_environment: "Development"
+    content_view: "CCV-RHEL8.10_All_Updates"
+    content_source: "{{ satellite_name }}"
+    activation_keys: "rhel8.10-dev"
+    parameters:
+      - name: "environment"
+        value: "development"
+        parameter_type: "string"
+
+  # RHEL 8.10 QA Environment
+  - name: "RHEL8-Base/QA"
+    description: "RHEL 8.10 systems for QA environment"
+    parent: "RHEL8-Base"
+    lifecycle_environment: "QA"
+    content_view: "CCV-RHEL8.10_All_Updates"
+    content_source: "{{ satellite_name }}"
+    activation_keys: "rhel8.10-qa"
+    parameters:
+      - name: "environment"
+        value: "qa"
+        parameter_type: "string"
+
+  # RHEL 8.10 Production Environment
+  - name: "RHEL8-Base/Production"
+    description: "RHEL 8.10 systems for Production environment"
+    parent: "RHEL8-Base"
+    lifecycle_environment: "Production"
+    content_view: "CCV-RHEL8.10_Security_Only"
+    content_source: "{{ satellite_name }}"
+    activation_keys: "rhel8.10-prod"
+    parameters:
+      - name: "environment"
+        value: "production"
+        parameter_type: "string"
+      - name: "package_upgrade"
+        value: "false"
+        parameter_type: "boolean"
+
+  # ============================================================================
+  # Role-Specific Hostgroups (Examples)
+  # ============================================================================
+
+  # Web Servers
+  - name: "RHEL9-Base/Production/WebServers"
+    description: "Production web servers on RHEL 9"
+    parent: "RHEL9-Base/Production"
+    parameters:
+      - name: "role"
+        value: "webserver"
+        parameter_type: "string"
+      - name: "http_port"
+        value: "80"
+        parameter_type: "integer"
+      - name: "https_port"
+        value: "443"
+        parameter_type: "integer"
+
+  # Database Servers
+  - name: "RHEL9-Base/Production/DatabaseServers"
+    description: "Production database servers on RHEL 9"
+    parent: "RHEL9-Base/Production"
+    parameters:
+      - name: "role"
+        value: "database"
+        parameter_type: "string"
+      - name: "db_port"
+        value: "5432"
+        parameter_type: "integer"

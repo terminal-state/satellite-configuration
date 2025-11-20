@@ -24,3 +24,32 @@
       loop: "{{ redhat_repositories }}"
       loop_control:
         label: "{{ item.name }}"
+      register: repository_enable_result
+
+    - name: Synchronize Red Hat repositories
+      redhat.satellite.repository_sync:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        product: "{{ item.product }}"
+        repository: "{{ item.name }}"
+      loop: "{{ redhat_repositories }}"
+      loop_control:
+        label: "{{ item.name }}"
+      async: 999999
+      poll: 0
+      register: repository_sync_jobs
+
+    - name: Wait for repository synchronization to complete
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+      register: sync_result
+      until: sync_result.finished
+      retries: 300
+      delay: 30
+      loop: "{{ repository_sync_jobs.results }}"
+      loop_control:
+        label: "Syncing repositories"
+      when: repository_sync_jobs.results is defined

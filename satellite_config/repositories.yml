@@ -31,7 +31,23 @@ redhat_repositories:
     sync_plan: "{{ daily_sync }}"
     content_type: "yum"
     enabled: true
- 
+
+  - name: "RHEL 9 BaseOS x86_64 Kickstart"
+    product: "Red Hat Enterprise Linux for x86_64"
+    label: "rhel-9-for-x86_64-baseos-kickstart"
+    releasever: "9.6"
+    sync_plan: "{{ daily_sync }}"
+    content_type: "yum"
+    enabled: true
+
+  - name: "RHEL 9 AppStream x86_64 Kickstart"
+    product: "Red Hat Enterprise Linux for x86_64"
+    label: "rhel-9-for-x86_64-appstream-kickstart"
+    releasever: "9.6"
+    sync_plan: "{{ daily_sync }}"
+    content_type: "yum"
+    enabled: true
+
   - name: "Red Hat Satellite Client 6 for RHEL 8 x86_64"
     product: "Red Hat Enterprise Linux for x86_64"
     label: "satellite-client-6-for-rhel-8-x86_64-rpms"

@@ -10,13 +10,14 @@
     - satellite_config/content_views.yml
     - satellite_config/lifecycle_environments.yml
   vars:
-    content_views_to_promote:
-      - "CCV-RHEL8.10_All_Updates"
-      - "CCV-RHEL8.10_Security_Only"
-      - "CCV-RHEL9.6_All_Updates"
-      - "CCV-RHEL9.6_Security_Only"
+    # All content views (both regular and composite) to publish to Library
+    all_content_views: "{{ content_views | map(attribute='name') | list }}"
+
+    # Only composite content views to promote to Development
+    composite_content_views: "{{ content_views | selectattr('composite', 'defined') | selectattr('composite', 'equalto', true) | map(attribute='name') | list }}"
+
   tasks:
-    - name: Publish Content Views
+    - name: Publish ALL Content Views to Library (regular and composite)
       redhat.satellite.content_view_version:
         server_url: "{{ satellite_server_url }}"
         username: "{{ satellite_username }}"
@@ -24,12 +25,14 @@
         validate_certs: "{{ satellite_validate_certs }}"
         organization: "{{ satellite_manifest_org }}"
         content_view: "{{ item }}"
-        description: "Published by Ansible"
-      loop: "{{ content_views_to_promote }}"
+        description: "Published by Ansible on {{ ansible_date_time.iso8601 }}"
+      loop: "{{ all_content_views }}"
+      loop_control:
+        label: "Publishing {{ item }} to Library"
       register: publish_results
       tags: publish
 
-    - name: Promote Content Views through lifecycle environments
+    - name: Promote COMPOSITE Content Views to Development only
       redhat.satellite.content_view_version:
         server_url: "{{ satellite_server_url }}"
         username: "{{ satellite_username }}"
@@ -42,8 +45,8 @@
           - "{{ item.1.name }}"
         state: present
       with_nested:
-        - "{{ content_views_to_promote }}"
-        - "{{ lifecycle_environments }}"
+        - "{{ composite_content_views }}"
+        - "{{ lifecycle_environments | selectattr('name', 'equalto', 'Development') | list }}"
       loop_control:
-        label: "{{ item.0 }} -> {{ item.1.name }}"
+        label: "Promoting {{ item.0 }} -> {{ item.1.name }}"
       tags: promote

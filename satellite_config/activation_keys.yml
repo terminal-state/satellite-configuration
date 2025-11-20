@@ -1,40 +1,36 @@
 ---
 activation_keys:
-  - name: "rhel8.10"
-    description: "RHEL 8.10 activation key with all updates"
-    lifecycle_environment: "Production"
-    content_view: "CCV-RHEL8.10_All_Updates"
-    release_version: "8.10"
-    service_level: "Premium"
-    auto_attach: true
-    max_hosts: 999
-    purpose_usage: "Production"
-    purpose_role: "Red Hat Enterprise Linux Server"
-    
-  - name: "rhel8.10-security"
-    description: "RHEL 8.10 activation key with security updates only"
-    lifecycle_environment: "Production"
-    content_view: "CCV-RHEL8.10_Security_Only"
-    release_version: "8.10"
-    service_level: "Premium"
-    auto_attach: true
-    max_hosts: 999
-    purpose_usage: "Production"
-    purpose_role: "Red Hat Enterprise Linux Server"
-    
-  - name: "rhel9.6"
-    description: "RHEL 9.6 activation key with all updates"
-    lifecycle_environment: "Production"
+  # ============================================================================
+  # RHEL 9.6 Activation Keys
+  # ============================================================================
+
+  # Development Environment
+  - name: "rhel9.6-dev"
+    description: "RHEL 9.6 Development - All updates"
+    lifecycle_environment: "Development"
     content_view: "CCV-RHEL9.6_All_Updates"
     release_version: "9.6"
     service_level: "Premium"
     auto_attach: true
     max_hosts: 999
-    purpose_usage: "Production"
+    purpose_usage: "Development/Test"
     purpose_role: "Red Hat Enterprise Linux Server"
-    
-  - name: "rhel9.6-security"
-    description: "RHEL 9.6 activation key with security updates only"
+
+  # QA Environment
+  - name: "rhel9.6-qa"
+    description: "RHEL 9.6 QA - All updates"
+    lifecycle_environment: "QA"
+    content_view: "CCV-RHEL9.6_All_Updates"
+    release_version: "9.6"
+    service_level: "Premium"
+    auto_attach: true
+    max_hosts: 999
+    purpose_usage: "Development/Test"
+    purpose_role: "Red Hat Enterprise Linux Server"
+
+  # Production Environment
+  - name: "rhel9.6-prod"
+    description: "RHEL 9.6 Production - Security updates only"
     lifecycle_environment: "Production"
     content_view: "CCV-RHEL9.6_Security_Only"
     release_version: "9.6"
@@ -44,19 +40,53 @@ activation_keys:
     purpose_usage: "Production"
     purpose_role: "Red Hat Enterprise Linux Server"
 
-activation_key_host_collections:
-  - activation_key: "rhel8.10"
-    host_collections:
-      - "RHEL8_Servers"
-      
-  - activation_key: "rhel8.10-security"
-    host_collections:
-      - "RHEL8_Security_Only"
-      
-  - activation_key: "rhel9.6"
-    host_collections:
-      - "RHEL9_Servers"
-      
-  - activation_key: "rhel9.6-security"
-    host_collections:
-      - "RHEL9_Security_Only"
+  # ============================================================================
+  # RHEL 8.10 Activation Keys
+  # ============================================================================
+
+  # Development Environment
+  - name: "rhel8.10-dev"
+    description: "RHEL 8.10 Development - All updates"
+    lifecycle_environment: "Development"
+    content_view: "CCV-RHEL8.10_All_Updates"
+    release_version: "8.10"
+    service_level: "Premium"
+    auto_attach: true
+    max_hosts: 999
+    purpose_usage: "Development/Test"
+    purpose_role: "Red Hat Enterprise Linux Server"
+
+  # QA Environment
+  - name: "rhel8.10-qa"
+    description: "RHEL 8.10 QA - All updates"
+    lifecycle_environment: "QA"
+    content_view: "CCV-RHEL8.10_All_Updates"
+    release_version: "8.10"
+    service_level: "Premium"
+    auto_attach: true
+    max_hosts: 999
+    purpose_usage: "Development/Test"
+    purpose_role: "Red Hat Enterprise Linux Server"
+
+  # Production Environment
+  - name: "rhel8.10-prod"
+    description: "RHEL 8.10 Production - Security updates only"
+    lifecycle_environment: "Production"
+    content_view: "CCV-RHEL8.10_Security_Only"
+    release_version: "8.10"
+    service_level: "Premium"
+    auto_attach: true
+    max_hosts: 999
+    purpose_usage: "Production"
+    purpose_role: "Red Hat Enterprise Linux Server"
+
+
+# Optional: Associate activation keys with host collections
+# activation_key_host_collections:
+#   - activation_key: "rhel9.6-dev"
+#     host_collections:
+#       - "RHEL9_Development"
+#
+#   - activation_key: "rhel9.6-prod"
+#     host_collections:
+#       - "RHEL9_Production"

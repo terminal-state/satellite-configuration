@@ -32,3 +32,34 @@
       loop_control:
         label: "{{ item.name }}"
       tags: repositories
+      register: external_repo_result
+
+    - name: Synchronize external repositories
+      redhat.satellite.repository_sync:
+        server_url: "{{ satellite_server_url }}"
+        username: "{{ satellite_username }}"
+        password: "{{ satellite_password }}"
+        validate_certs: "{{ satellite_validate_certs }}"
+        organization: "{{ satellite_manifest_org }}"
+        product: "{{ item.product }}"
+        repository: "{{ item.name }}"
+      loop: "{{ external_repositories }}"
+      loop_control:
+        label: "{{ item.name }}"
+      async: 999999
+      poll: 0
+      register: external_sync_jobs
+      tags: repositories
+
+    - name: Wait for external repository synchronization to complete
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+      register: external_sync_result
+      until: external_sync_result.finished
+      retries: 300
+      delay: 30
+      loop: "{{ external_sync_jobs.results }}"
+      loop_control:
+        label: "Syncing external repositories"
+      when: external_sync_jobs.results is defined
+      tags: repositories

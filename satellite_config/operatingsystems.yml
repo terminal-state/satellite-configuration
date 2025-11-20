@@ -1,0 +1,98 @@
+---
+operatingsystems:
+  # RHEL 9 versions
+  - name: "RedHat"
+    major: "9"
+    minor: "5"
+    description: "Red Hat Enterprise Linux 9.5"
+    family: "Redhat"
+    release_name: "Plow"
+    architectures:
+      - "x86_64"
+    media:
+      - "RHEL 9.5 Kickstart Media"
+    ptables:
+      - "RHEL9_Standard"
+
+  - name: "RedHat"
+    major: "9"
+    minor: "6"
+    description: "Red Hat Enterprise Linux 9.6"
+    family: "Redhat"
+    release_name: "Plow"
+    architectures:
+      - "x86_64"
+    media:
+      - "RHEL 9.6 Kickstart Media"
+    ptables:
+      - "RHEL9_Standard"
+
+  - name: "RedHat"
+    major: "9"
+    minor: "7"
+    description: "Red Hat Enterprise Linux 9.7"
+    family: "Redhat"
+    release_name: "Plow"
+    architectures:
+      - "x86_64"
+    media:
+      - "RHEL 9.7 Kickstart Media"
+    ptables:
+      - "RHEL9_Standard"
+
+  # RHEL 8 versions
+  - name: "RedHat"
+    major: "8"
+    minor: "10"
+    description: "Red Hat Enterprise Linux 8.10"
+    family: "Redhat"
+    release_name: "Ootpa"
+    architectures:
+      - "x86_64"
+    media:
+      - "RHEL 8.10 Kickstart Media"
+    ptables:
+      - "RHEL8_Standard"
+
+# Optional: Define installation media
+installation_media:
+  - name: "RHEL 9.5 Kickstart Media"
+    path: "http://{{ satellite_name }}.{{ domain }}/pulp/content/{{ satellite_manifest_org }}/Library/content/dist/rhel9/9.5/x86_64/baseos/kickstart/"
+    os_family: "Redhat"
+    operatingsystems:
+      - "RedHat 9.5"
+    locations:
+      - "{{ default_location }}"
+    organizations:
+      - "{{ satellite_manifest_org }}"
+
+  - name: "RHEL 9.6 Kickstart Media"
+    path: "http://{{ satellite_name }}.{{ domain }}/pulp/content/{{ satellite_manifest_org }}/Library/content/dist/rhel9/9.6/x86_64/baseos/kickstart/"
+    os_family: "Redhat"
+    operatingsystems:
+      - "RedHat 9.6"
+    locations:
+      - "{{ default_location }}"
+    organizations:
+      - "{{ satellite_manifest_org }}"
+
+  - name: "RHEL 8.10 Kickstart Media"
+    path: "http://{{ satellite_name }}.{{ domain }}/pulp/content/{{ satellite_manifest_org }}/Library/content/dist/rhel8/8.10/x86_64/baseos/kickstart/"
+    os_family: "Redhat"
+    operatingsystems:
+      - "RedHat 8.10"
+    locations:
+      - "{{ default_location }}"
+    organizations:
+      - "{{ satellite_manifest_org }}"
+
+# Parameters to set for all operating systems
+os_parameters:
+  - name: "keyboard"
+    value: "uk"
+  - name: "lang"
+    value: "en_UK.UTF-8"
+  - name: "selinux-mode"
+    value: "enforcing"
+  - name: "time-zone"
+    value: "UTC"
