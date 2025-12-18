@@ -21,11 +21,8 @@
         lifecycle_environment: "{{ item.lifecycle_environment }}"
         content_view: "{{ item.content_view }}"
         release_version: "{{ item.release_version | default(omit) }}"
-        service_level: "{{ item.service_level | default(omit) }}"
         auto_attach: "{{ item.auto_attach | default(true) }}"
         max_hosts: "{{ item.max_hosts | default(omit) }}"
-        purpose_usage: "{{ item.purpose_usage | default(omit) }}"
-        purpose_role: "{{ item.purpose_role | default(omit) }}"
         state: present
       loop: "{{ activation_keys }}"
       loop_control:
